@@ -184,3 +184,19 @@ class OneHot(Base):
             outputs=[y],
             name="test_onehot_with_bfloat16_values",
         )
+
+    @staticmethod
+    def export_with_extreme_float_values() -> None:
+        node = onnx.helper.make_node(
+            "OneHot", inputs=["indices", "depth", "values"], outputs=["y"]
+        )
+        indices = np.array([0, 1], dtype=np.int64)
+        depth = np.array(2, dtype=np.int64)
+        values = np.array([-3e38, 3e38], dtype=np.float32)
+        y = np.array([[3e38, -3e38], [-3e38, 3e38]], dtype=np.float32)
+        expect(
+            node,
+            inputs=[indices, depth, values],
+            outputs=[y],
+            name="test_onehot_with_extreme_float_values",
+        )

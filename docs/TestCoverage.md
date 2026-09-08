@@ -18673,7 +18673,7 @@ expect(node, inputs=[x], outputs=[y], name="test_neg")
 
 
 ### NegativeLogLikelihoodLoss
-There are 18 test cases, listed as following:
+There are 19 test cases, listed as following:
 <details>
 <summary>input_shape_is_NC</summary>
 
@@ -19251,6 +19251,37 @@ expect(
     inputs=[input, target],
     outputs=[negative_log_likelihood_loss],
     name="test_nllloss_NCd1d2d3d4d5_none_no_weight",
+)
+```
+
+</details>
+<details>
+<summary>mean_no_weight_ignore_index_minus_one</summary>
+
+```python
+reduction = "mean"
+ignore_index = np.int64(-1)
+
+node = onnx.helper.make_node(
+    "NegativeLogLikelihoodLoss",
+    inputs=["input", "target"],
+    outputs=["loss"],
+    reduction=reduction,
+    ignore_index=ignore_index,
+)
+
+input = np.log(np.array([[0.25, 0.75], [0.5, 0.5]], dtype=np.float32))
+target = np.array([0, -1], dtype=np.int64)
+
+negative_log_likelihood_loss = compute_negative_log_likelihood_loss(
+    input, target, reduction=reduction, ignore_index=ignore_index
+)
+
+expect(
+    node,
+    inputs=[input, target],
+    outputs=[negative_log_likelihood_loss],
+    name="test_nllloss_mean_no_weight_ignore_index_minus_one",
 )
 ```
 

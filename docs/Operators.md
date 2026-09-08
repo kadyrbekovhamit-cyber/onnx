@@ -286,6 +286,7 @@ expect(node, inputs=[x], outputs=[y], name="test_abs")
 </details>
 
 
+
 #### Sample Implementation
 
 <details>
@@ -25945,6 +25946,39 @@ expect(
 </details>
 
 
+<details>
+<summary>mean_no_weight_ignore_index_minus_one</summary>
+
+```python
+reduction = "mean"
+ignore_index = np.int64(-1)
+
+node = onnx.helper.make_node(
+    "NegativeLogLikelihoodLoss",
+    inputs=["input", "target"],
+    outputs=["loss"],
+    reduction=reduction,
+    ignore_index=ignore_index,
+)
+
+input = np.log(np.array([[0.25, 0.75], [0.5, 0.5]], dtype=np.float32))
+target = np.array([0, -1], dtype=np.int64)
+
+negative_log_likelihood_loss = compute_negative_log_likelihood_loss(
+    input, target, reduction=reduction, ignore_index=ignore_index
+)
+
+expect(
+    node,
+    inputs=[input, target],
+    outputs=[negative_log_likelihood_loss],
+    name="test_nllloss_mean_no_weight_ignore_index_minus_one",
+)
+```
+
+</details>
+
+
 ### <a name="NonMaxSuppression"></a><a name="nonmaxsuppression">**NonMaxSuppression**</a>
 
   Filter out boxes that have high intersection-over-union (IOU) overlap with previously selected boxes.
@@ -46703,5 +46737,3 @@ expect(
 ```
 
 </details>
-
-

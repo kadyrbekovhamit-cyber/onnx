@@ -522,6 +522,33 @@ class NegativeLogLikelihoodLoss(Base):
         )
 
     @staticmethod
+    def export_mean_no_weight_ignore_index_minus_one() -> None:
+        reduction = "mean"
+        ignore_index = np.int64(-1)
+
+        node = onnx.helper.make_node(
+            "NegativeLogLikelihoodLoss",
+            inputs=["input", "target"],
+            outputs=["loss"],
+            reduction=reduction,
+            ignore_index=ignore_index,
+        )
+
+        input = np.log(np.array([[0.25, 0.75], [0.5, 0.5]], dtype=np.float32))
+        target = np.array([0, -1], dtype=np.int64)
+
+        negative_log_likelihood_loss = compute_negative_log_likelihood_loss(
+            input, target, reduction=reduction, ignore_index=ignore_index
+        )
+
+        expect(
+            node,
+            inputs=[input, target],
+            outputs=[negative_log_likelihood_loss],
+            name="test_nllloss_mean_no_weight_ignore_index_minus_one",
+        )
+
+    @staticmethod
     def export_input_shape_is_NCd1d2d3_none_no_weight_negative_ii() -> None:
         reduction = "none"
         ignore_index = np.int64(-5)

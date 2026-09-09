@@ -4722,6 +4722,35 @@ class TestReferenceEvaluator:
         # specific message is on the chained cause rather than the exception itself.
         assert "does not support integer input" in str(exc_info.value.__cause__)
 
+    @pytest.mark.parametrize("axis", [1, -1])
+    def test_unique_not_sorted_with_nonzero_axis(self, axis):
+        x = np.array([[1, 2, 1, 3], [10, 20, 10, 30]], dtype=np.int64)
+        output_names = ["Y", "indices", "inverse_indices", "counts"]
+        node = make_node("Unique", ["X"], output_names, axis=axis, sorted=0)
+        outputs = [
+            make_tensor_value_info(name, TensorProto.INT64, None)
+            for name in output_names
+        ]
+        model = make_model(
+            make_graph(
+                [node],
+                "g",
+                [make_tensor_value_info("X", TensorProto.INT64, list(x.shape))],
+                outputs,
+            ),
+            opset_imports=[make_opsetid("", 11)],
+        )
+
+        actual = ReferenceEvaluator(model).run(None, {"X": x})
+        expected = (
+            np.array([[1, 2, 3], [10, 20, 30]], dtype=np.int64),
+            np.array([0, 1, 3], dtype=np.int64),
+            np.array([0, 1, 0, 2], dtype=np.int64),
+            np.array([2, 1, 1], dtype=np.int64),
+        )
+        for got, want in zip(actual, expected, strict=True):
+            np.testing.assert_array_equal(got, want)
+
     @pytest.mark.parametrize("dim", [1, 2, 3, 4, 5, 6])
     def test_pad(self, dim):
         X = make_tensor_value_info("X", TensorProto.FLOAT, None)
